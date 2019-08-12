@@ -36,6 +36,9 @@ My goal here is to perform as minimual amount of manual steps as possible for se
 **Note:** Debian 10 (Buster) no need to manually expand the filesystem.  This is automatically done on first boot.
 
 
-web.yml - 
+## setup_web.yml
+    ansible-playbook -u pi -i inventory ./playbooks/setup_web.yml
+This playbook will install Nginx's latest version, php7.3-fpm, php7.3-mysql, and apache2-utils.  You are given the choice to configure your system for duckdns (free dynamic DNS).  Work-In-Progress on adding user html/php code, and ssl/cerbot, either in this playbook or another. 
 
-db.yml - 
+## setup_db.yml 
+WIP
