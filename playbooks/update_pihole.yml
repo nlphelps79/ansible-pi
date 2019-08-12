@@ -1,0 +1,15 @@
+- name: Updating Pi & PiHole
+  hosts: pihole
+  become: true
+  become_user: root
+  
+  tasks:
+
+  - name: Update apt packages
+    apt: 
+      update_cache: yes
+      upgrade: dist
+
+  - name: Update PiHole
+    become: false
+    command: pihole -up

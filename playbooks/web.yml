@@ -1,0 +1,56 @@
+- name: Install & Configure Website
+  hosts: raspberrypi
+  become: true
+  become_user: root
+
+  tasks:
+
+  - name: Create scripts/duckdns directory under pi
+    file:
+      name: "scripts/duckdns"
+      state: directory
+      owner: pi
+      group: pi
+
+  - name: Copy duck.sh file
+    copy:
+      src: duck.sh
+      dest: "/home/pi/scripts/duckdns"
+      owner: pi
+      group: pi
+      mode: 0700
+      force: true
+
+  - name: Add 'duck.sh' to crontab
+    become: false
+    cron:
+      name: "Check WAN DNS"
+      minute: "*/5"
+      job: "~/scripts/duckdns/duck.sh >/dev/null 2>&1"
+
+  - name: Update the repository cache and update package "nginx" to latest version
+    apt:
+      name: nginx
+      state: latest
+      update_cache: yes
+
+  #- pause:
+  #    minutes: 10
+  - name: Install php7.3-FPM, php7.3-mysql extension, and apache2-utils
+    apt:
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - php7.3-fpm
+      - php7.3-mysql
+      - apache2-utils
+
+  - name: Configure Nginx to use PHP
+    copy:
+      src: default
+      dest: /etc/nginx/sites-enabled/default
+
+  - name: Restart Nginx
+    service:
+      name: nginx
+      state: restarted
