@@ -3,6 +3,11 @@
   become: true
   become_user: root
 
+  vars_prompt:
+    - name: "duck_work"
+      prompt: "Will you utilize duckdns on this Pi? (yes/no)"
+      private: no
+
   tasks:
 
   - name: Create scripts/duckdns directory under pi
@@ -11,6 +16,7 @@
       state: directory
       owner: pi
       group: pi
+    when: duck_work | bool
 
   - name: Copy duck.sh file
     copy:
@@ -20,6 +26,7 @@
       group: pi
       mode: 0700
       force: true
+    when: duck_work | bool
 
   - name: Add 'duck.sh' to crontab
     become: false
@@ -27,6 +34,7 @@
       name: "Check WAN DNS"
       minute: "*/5"
       job: "~/scripts/duckdns/duck.sh >/dev/null 2>&1"
+    when: duck_work | bool
 
   - name: Update the repository cache and update package "nginx" to latest version
     apt:
@@ -34,8 +42,6 @@
       state: latest
       update_cache: yes
 
-  #- pause:
-  #    minutes: 10
   - name: Install php7.3-FPM, php7.3-mysql extension, and apache2-utils
     apt:
       name: "{{ packages }}"
@@ -54,3 +60,6 @@
     service:
       name: nginx
       state: restarted
+
+  #- pause:
+  #    minutes: 10
