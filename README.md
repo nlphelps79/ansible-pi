@@ -6,7 +6,8 @@ My collection of Ansible playbooks for the Raspberry Pi.  These playbooks will s
     git clone https://github.com/TooManyEggrolls/ansible-pi.git
     cd ansible-pi/
 
-
+## Requirements
+    N/A 
 
 ## setup.yml
     ansible-playbook -u pi -i inventory ./playbooks/setup.yml
