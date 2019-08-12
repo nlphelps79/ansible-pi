@@ -1,0 +1,100 @@
+- name: Rasberry Pi Provisioning
+  hosts: raspberrypi
+  gather_facts: yes
+  vars:
+    locale: "en_US.UTF-8"
+    keyboard_layout: "us"
+    memory: "16"
+    timezone: America/Chicago
+    hostname: "test"
+    ip: "192.168.0.37/24"
+    router: "192.168.0.1"
+    dns: "192.168.0.34"
+    sshport: 18022
+  become: true
+  become_user: root
+
+  tasks:
+
+  - name: Set the locale via raspi-config
+    command: raspi-config nonint do_change_locale {{ locale }}
+
+  - name: Set the keyboard layout via raspi-config
+    command: raspi-config nonint do_configure_keyboard {{ keyboard_layout }}
+
+  - name: Set the GPU memory split value via raspi-config
+    command: raspi-config nonint do_memory_split {{ memory }}
+
+  - name: set /etc/timezone
+    command: timedatectl set-timezone {{ timezone }}
+
+  - name: Set the hostname
+    command: hostnamectl set-hostname "{{ hostname }}"
+
+  # Set the hostname in /etc/hosts too
+  - name: Set the other hostname
+    command: sed -i "s/127.0.1.1.*raspberrypi/127.0.1.1\t{{ hostname }}/g" /etc/hosts
+
+  - name: update tzdata
+    command: dpkg-reconfigure --frontend noninteractive tzdata
+
+  - name: Activate eth0 for static IP
+    lineinfile:
+      path: /etc/dhcpcd.conf
+      line: interface eth0
+      insertafter: '# Example static IP configuration:'
+      state: present
+
+  - name: Assign static IP to eth0
+    lineinfile:
+      path: /etc/dhcpcd.conf
+      regexp: '#static ip_address=192\.168\.0\.10\/24'
+      line: 'static ip_address={{ ip }}'
+
+  - name: Assign static router to eth0
+    lineinfile:
+      path: /etc/dhcpcd.conf
+      regexp: '#static routers=192\.168\.0\.1'
+      line: 'static routers={{ router }}'
+
+  - name: Assign static DNS to eth0
+    lineinfile:
+      path: /etc/dhcpcd.conf
+      regexp: '#static domain_name_servers=192\.168\.0\.1 8\.8\.8\.8 fd51\:42f8\:caae\:d92e\:\:1'
+      line: 'static domain_name_servers={{ dns }}'
+
+  - name: Change ssh port
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '#Port 22'
+      line: 'Port {{ sshport }}'
+
+  - name: Change PasswordAuthentication to no and uncomment
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: '#PasswordAuthentication yes'
+      line: 'PasswordAuthentication no'
+
+  - name: Ensure ChallengeResponseAuthentication no is set as is
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: 'ChallengeResponseAuthentication no'
+      line: 'ChallengeResponseAuthentication no'
+
+  - name: Change UsePAM yes to UsePAM no
+    lineinfile:
+      path: /etc/ssh/sshd_config
+      regexp: 'UsePAM yes'
+      line: 'UsePAM no'
+
+  - name: Update apt packages
+    apt:
+      update_cache: yes
+      upgrade: dist
+
+  - name: Install git
+    apt:
+      name: git
+
+  - name: System Reboot
+    command: shutdown -r +0 'Ansible Reboot triggered'
