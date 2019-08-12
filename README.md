@@ -14,8 +14,7 @@ My collection of Ansible playbooks for the Raspberry Pi.  These playbooks will s
 
 ![setup.yml Playbook Screenshot](https://github.com/TooManyEggrolls/ansible-pi/screenshots/setup.png)
 
-My goal here is to perform as minimual amount of manual steps as possible for setting up Raspberry Pi's "initial setup." This playbook will make the following changes to your system (change the variables in the setup.yml):
-
+My goal here is to perform as minimual amount of manual steps as possible for setting up Raspberry Pi's "initial setup." These are steps that I perform every single time I spin up a new Pi.  This playbook will make the following changes to your system (change the variables in the setup.yml to fit your environment):
 
     1) Set the system local
     2) Set the keyboard layout
