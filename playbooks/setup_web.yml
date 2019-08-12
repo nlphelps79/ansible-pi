@@ -56,10 +56,20 @@
       src: default
       dest: /etc/nginx/sites-enabled/default
 
+  - name: Copy basic index.php file
+    copy:
+      src: index.php
+      dest: "/var/www/html/"
+      owner: root
+      group: root
+      mode: 0644
+      force: true
+
   - name: Restart Nginx
     service:
       name: nginx
       state: restarted
 
   #- pause:
-  #    minutes: 10
+  #    minutes: 5
+  #    prompt: "Verify Nginx/PHP is working"
