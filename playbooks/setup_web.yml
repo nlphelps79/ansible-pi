@@ -65,6 +65,25 @@
       mode: 0644
       force: true
 
+  - name: Enable mysqli extension for cli
+    lineinfile:
+      path: /etc/php/7.3/cli/php.ini
+      backup: yes
+      regexp: ';extension=mysqli'
+      line: 'extension=mysqli'
+
+  - name: Enable mysqli extension for fpm
+    lineinfile:
+      path: /etc/php/7.3/fpm/php.ini
+      backup: yes
+      regexp: ';extension=mysqli'
+      line: 'extension=mysqli'
+
+  - name: Restart PHP
+    service:
+      name: php7.3-fpm
+      state: restarted
+
   - name: Restart Nginx
     service:
       name: nginx
