@@ -21,7 +21,7 @@ My goal here is to perform as minimual amount of manual steps as possible for se
     3) Set the GPU memory
     4) Set timezone
     5) Set hostname
-    6) Activate's interface 'eth0' for static IP
+    6) Enable interface 'eth0' for static IP
     7) Set static IP of Pi
     8) Set static IP of router
     9) Set static IP for DNS
@@ -38,7 +38,19 @@ My goal here is to perform as minimual amount of manual steps as possible for se
 
 ## setup_web.yml
     ansible-playbook -u pi -i inventory ./playbooks/setup_web.yml
-This playbook will install Nginx's latest version, php7.3-fpm, php7.3-mysql, and apache2-utils.  You are given the choice to configure your system for duckdns (free dynamic DNS).  Work-In-Progress on adding user html/php code, and ssl/cerbot, either in this playbook or another. 
+You are given two options: 1) Are you using 'duckdns' (free dynamic DNS)?   2) Do you have any website data to transfer? The playbook makes the following changes:   
 
+    1) If answered 'yes' to first question, this creates 'scripts/duckdns/duck.sh' directory under pi & adds a crontab that          runs the 'duck.sh' script every 5 minutes
+    2) Installs the latest version of Nginx
+    3) Installs php7.3-fpm, php7.3-mysql, and apache2-utils
+    4) Edit Nginx's conf file to allow php
+    5) Copy basic php page "standard version page"
+    6) Enable mysqli extension in php.ini under 'cli' folder
+    7) Enable mysqli entension in php.ini under 'fpm' folder
+    8) Restart PHP & Nginx
+    9) If answered 'yes' to second question, this will copy your website data
+    10) WIP -- ssl/cerbot/lesencrypt
+    
+    
 ## setup_db.yml 
 WIP
