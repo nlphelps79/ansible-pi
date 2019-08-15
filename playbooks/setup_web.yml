@@ -89,6 +89,14 @@
       name: nginx
       state: restarted
 
-  #- pause:
-  #    minutes: 5
-  #    prompt: "Verify Nginx/PHP is working"
+  - pause:
+      minutes: 5
+      prompt: "Verify Nginx/PHP is working"
+
+  - name: Copy website files
+    copy:
+      src: html/
+      dest: "/var/www/html/"
+      #mode: 0700
+      force: true
+    when: website_copy | bool
