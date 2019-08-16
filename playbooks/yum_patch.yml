@@ -1,0 +1,68 @@
+- name: Performing yum update on host(s)
+  hosts: "{{ host_group }}"
+  become: yes
+  any_errors_fatal: false
+
+  tasks:
+
+  ### Pre-patching steps ###
+
+  - name: check for updates (yum)
+    yum: list=updates update_cache=true
+    register: yumoutput
+    tags:
+    - patch
+    - dry_check_patch
+    
+  - debug:
+      msg: "{{ yumoutput.results | map(attribute='name') | list }}"
+    when: yumoutput.results.0 is defined
+    tags:
+    - dry_check_patch
+    
+  - debug:
+      msg: "{{ ansible_host }} host does not require patching"
+    when: yumoutput.results.0 is not defined
+    tags:
+    - dry_check_patch
+
+  ### Patching steps ###
+
+  - name: Updating all packages
+    yum:
+      name: '*'
+      state: latest
+    when: yumoutput.results.0 is defined
+    async: 3600
+    poll: 30
+    tags:
+    - patch
+
+  ### Rebooting only patched instances ###
+  
+  - name: Rebooting host(s).
+    reboot:
+      reboot_timeout: 3600
+      test_command: echo {{ ansible_host }} is back up
+    when: yumoutput.results.0 is defined
+    tags:
+    - patch
+
+  ### verifying all hosts packages are updated ###
+  - name: verify os patch returns no packages to be patched
+    yum: list=updates update_cache=true
+    register: yumoutput_post
+    tags:
+    - patch
+
+  - debug:
+      msg: "All packages have been patched successfully on {{ ansible_host }}"
+    when: yumoutput_post.results.0 is not defined
+    tags:
+    - patch
+    
+  - debug:
+      msg: "**** there was an issue with patching on {{ ansible_host }}"
+    when: yumoutput_post.results.0 is defined
+    tags:
+    - patch
